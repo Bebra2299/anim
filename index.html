@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Blur and Button Animation</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #1a1a1a;
+      font-family: Arial, sans-serif;
+      overflow-y: scroll; /* Для скролла */
+      height: 200vh; /* Увеличиваем высоту для теста */
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .card {
+      position: relative;
+      width: 150px;
+      height: 200px;
+      background: linear-gradient(135deg, #ff00cc, #3333ff);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      transition: transform 0.3s ease, filter 0.3s ease, opacity 0.3s ease;
+    }
+
+    .blurred {
+      transform: perspective(100px) rotateX(10deg); /* Перспектива */
+      filter: blur(5px); /* Размытие */
+      opacity: 0.7; /* Прозрачность */
+    }
+
+    .buy-button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #ff4500;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    .buy-button:hover {
+      background-color: #ff5733;
+    }
+
+    .buy-button:active {
+      transform: scale(1.1); /* Увеличение при нажатии */
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="grid">
+    <!-- Генерация 20 карточек -->
+    <script>
+      for (let i = 1; i <= 20; i++) {
+        document.write(`
+          <div class="card">
+            Карточка ${i}
+            <button class="buy-button">Купить</button>
+          </div>
+        `);
+      }
+    </script>
+  </div>
+
+  <script>
+    const container = document.getElementById('grid');
+
+    function applySmoothBlurEffect() {
+      const cards = document.querySelectorAll('.card');
+
+      cards.forEach((card) => {
+        const cardRect = card.getBoundingClientRect();
+
+        // Вычисляем, насколько карточка вышла за пределы экрана
+        const overflowAmount = Math.max(0, cardRect.bottom - window.innerHeight);
+        const maxBlur = 50; // Максимальное размытие
+        const maxTilt = 10; // Максимальный угол поворота
+
+        if (overflowAmount > 0) {
+          // Рассчитываем интенсивность эффектов
+          const blur = Math.min(maxBlur, (overflowAmount / cardRect.height) * maxBlur);
+          const tilt = Math.min(maxTilt, (overflowAmount / cardRect.height) * maxTilt);
+
+          // Применяем стили к карточке
+          card.style.transform = `perspective(100px) rotateX(${tilt}deg)`;
+          card.style.filter = `blur(${blur / 10}px)`; // Чем больше overflow, тем больше размытие
+          card.style.opacity = `${1 - blur / maxBlur}`;
+        } else {
+          // Сбрасываем стили, если карточка в зоне видимости
+          card.style.transform = '';
+          card.style.filter = '';
+          card.style.opacity = '';
+        }
+      });
+    }
+
+    // Обновляем эффект при скролле
+    window.addEventListener('scroll', applySmoothBlurEffect);
+
+    // Проверяем эффект при загрузке
+    window.addEventListener('load', applySmoothBlurEffect);
+  </script>
+</body>
+</html>
